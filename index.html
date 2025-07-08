@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioSys - School Library Management</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous">
+    
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            color: #007bff !important;
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .sidebar .nav-link {
+            color: #495057;
+            padding: 0.5rem 1rem;
+            margin-bottom: 0.25rem;
+            border-radius: 0.375rem;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            border: 1px solid rgba(0,0,0,0.125);
+        }
+        
+        .table-responsive {
+            border-radius: 0.375rem;
+        }
+        
+        .btn {
+            border-radius: 0.375rem;
+        }
+        
+        .form-control {
+            border-radius: 0.375rem;
+        }
+        
+        .alert {
+            border-radius: 0.375rem;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .login-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-logo h1 {
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-borrowed {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .status-returned {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .status-overdue {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .pagination {
+            justify-content: center;
+        }
+        
+        .search-form {
+            margin-bottom: 1.5rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .error {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .success {
+            color: #28a745;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="hidden">
+        <div class="container">
+            <div class="login-container">
+                <div class="login-logo">
+                    <h1>📚 BiblioSys</h1>
+                    <p class="text-muted">School Library Management System</p>
+                </div>
+                
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </button>
+                    
+                    <div id="login-error" class="alert alert-danger mt-3 hidden"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Application -->
+    <div id="main-app" class="hidden">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-book me-2"></i>BiblioSys
+                </a>
+                
+                <div class="navbar-nav ms-auto">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-2"></i><span id="user-name">User</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3 col-lg-2 sidebar">
+                    <ul class="nav nav-pills flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" onclick="showView('dashboard')">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showView('students')">
+                                <i class="fas fa-users me-2"></i>Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showView('books')">
+                                <i class="fas fa-book me-2"></i>Books
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showView('lending')">
+                                <i class="fas fa-exchange-alt me-2"></i>Lending
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Main Content -->
+                <div class="col-md-9 col-lg-10 main-content">
+                    <div id="alert-container"></div>
+                    
+                    <!-- Dashboard View -->
+                    <div id="dashboard-view" class="view">
+                        <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h2>
+                        <div class="row">
+                            <div class="col-md-6 col-lg-3 mb-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Students</h5>
+                                        <h3 class="text-primary" id="total-students">-</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Books</h5>
+                                        <h3 class="text-success" id="total-books">-</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Books Borrowed</h5>
+                                        <h3 class="text-warning" id="books-borrowed">-</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Overdue Books</h5>
+                                        <h3 class="text-danger" id="overdue-books">-</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Students View -->
+                    <div id="students-view" class="view hidden">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fas fa-users me-2"></i>Students</h2>
+                            <button class="btn btn-primary" onclick="showStudentModal()">
+                                <i class="fas fa-plus me-2"></i>Add Student
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="search-form">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control" id="students-search" placeholder="Search students...">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button class="btn btn-secondary" onclick="searchStudents()">
+                                                <i class="fas fa-search me-2"></i>Search
+                                            </button>
+                                            <button class="btn btn-outline-secondary ms-2" onclick="clearSearch('students')">
+                                                <i class="fas fa-times me-2"></i>Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Student ID</th>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Phone</th>
+                                                <th>Class</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="students-table-body">
+                                            <tr>
+                                                <td colspan="6" class="text-center">
+                                                    <div class="loading">
+                                                        <i class="fas fa-spinner fa-spin me-2"></i>Loading...
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div id="students-pagination" class="d-flex justify-content-center mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Books View -->
+                    <div id="books-view" class="view hidden">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fas fa-book me-2"></i>Books</h2>
+                            <button class="btn btn-primary" onclick="showBookModal()">
+                                <i class="fas fa-plus me-2"></i>Add Book
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="search-form">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control" id="books-search" placeholder="Search books...">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button class="btn btn-secondary" onclick="searchBooks()">
+                                                <i class="fas fa-search me-2"></i>Search
+                                            </button>
+                                            <button class="btn btn-outline-secondary ms-2" onclick="clearSearch('books')">
+                                                <i class="fas fa-times me-2"></i>Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>ISBN</th>
+                                                <th>Title</th>
+                                                <th>Author</th>
+                                                <th>Category</th>
+                                                <th>Total Copies</th>
+                                                <th>Available</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="books-table-body">
+                                            <tr>
+                                                <td colspan="7" class="text-center">
+                                                    <div class="loading">
+                                                        <i class="fas fa-spinner fa-spin me-2"></i>Loading...
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div id="books-pagination" class="d-flex justify-content-center mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lending View -->
+                    <div id="lending-view" class="view hidden">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fas fa-exchange-alt me-2"></i>Lending</h2>
+                            <button class="btn btn-primary" onclick="showLendingModal()">
+                                <i class="fas fa-plus me-2"></i>Borrow Book
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="search-form">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" id="lending-search" placeholder="Search lending...">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select" id="lending-status">
+                                                <option value="">All Status</option>
+                                                <option value="borrowed">Borrowed</option>
+                                                <option value="returned">Returned</option>
+                                                <option value="overdue">Overdue</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-secondary" onclick="searchLending()">
+                                                <i class="fas fa-search me-2"></i>Search
+                                            </button>
+                                            <button class="btn btn-outline-secondary ms-2" onclick="clearSearch('lending')">
+                                                <i class="fas fa-times me-2"></i>Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Student</th>
+                                                <th>Book</th>
+                                                <th>Borrowed Date</th>
+                                                <th>Due Date</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lending-table-body">
+                                            <tr>
+                                                <td colspan="6" class="text-center">
+                                                    <div class="loading">
+                                                        <i class="fas fa-spinner fa-spin me-2"></i>Loading...
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div id="lending-pagination" class="d-flex justify-content-center mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Student Modal -->
+    <div class="modal fade" id="studentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentModalTitle">Add Student</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="student-form">
+                        <input type="hidden" id="student-id" name="id">
+                        
+                        <div class="mb-3">
+                            <label for="student-student-id" class="form-label">Student ID</label>
+                            <input type="text" class="form-control" id="student-student-id" name="student_id" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="student-first-name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="student-first-name" name="first_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="student-last-name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="student-last-name" name="last_name" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="student-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="student-email" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="student-phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="student-phone" name="phone">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="student-class" class="form-label">Class</label>
+                            <input type="text" class="form-control" id="student-class" name="class" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveStudent()">Save Student</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Book Modal -->
+    <div class="modal fade" id="bookModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookModalTitle">Add Book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="book-form">
+                        <input type="hidden" id="book-id" name="id">
+                        
+                        <div class="mb-3">
+                            <label for="book-isbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="book-isbn" name="isbn" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="book-title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="book-title" name="title" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="book-author" class="form-label">Author</label>
+                            <input type="text" class="form-control" id="book-author" name="author" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="book-publisher" class="form-label">Publisher</label>
+                                    <input type="text" class="form-control" id="book-publisher" name="publisher">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="book-year" class="form-label">Publication Year</label>
+                                    <input type="number" class="form-control" id="book-year" name="publication_year" min="1900" max="2099">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="book-category" class="form-label">Category</label>
+                                    <input type="text" class="form-control" id="book-category" name="category" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="book-copies" class="form-label">Total Copies</label>
+                                    <input type="number" class="form-control" id="book-copies" name="total_copies" min="1" required>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBook()">Save Book</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lending Modal -->
+    <div class="modal fade" id="lendingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Borrow Book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="lending-form">
+                        <div class="mb-3">
+                            <label for="lending-student" class="form-label">Student</label>
+                            <select class="form-select" id="lending-student" name="student_id" required>
+                                <option value="">Select a student...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="lending-book" class="form-label">Book</label>
+                            <select class="form-select" id="lending-book" name="book_id" required>
+                                <option value="">Select a book...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="lending-due-date" class="form-label">Due Date</label>
+                            <input type="date" class="form-control" id="lending-due-date" name="due_date" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="lending-notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="lending-notes" name="notes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveLending()">Borrow Book</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Return Book Modal -->
+    <div class="modal fade" id="returnModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Return Book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="return-form">
+                        <input type="hidden" id="return-lending-id" name="lending_id">
+                        
+                        <div class="mb-3">
+                            <label for="return-notes" class="form-label">Return Notes</label>
+                            <textarea class="form-control" id="return-notes" name="notes" rows="3" placeholder="Optional notes about the return..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="returnBook()">Return Book</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let csrfToken = null;
+        let currentView = 'dashboard';
+        let currentPage = {
+            students: 1,
+            books: 1,
+            lending: 1
+        };
+        
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSession();
+            
+            // Set up event listeners
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('students-search').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchStudents();
+            });
+            document.getElementById('books-search').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchBooks();
+            });
+            document.getElementById('lending-search').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchLending();
+            });
+            document.getElementById('lending-status').addEventListener('change', searchLending);
+            
+            // Set default due date to 2 weeks from today
+            const today = new Date();
+            const dueDate = new Date(today);
+            dueDate.setDate(today.getDate() + 14);
+            document.getElementById('lending-due-date').value = dueDate.toISOString().split('T')[0];
+        });
+        
+        // Authentication functions
+        async function checkSession() {
+            try {
+                const response = await fetch('data.php?action=check_session', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUser = data.user;
+                    csrfToken = data.csrf_token;
+                    showMainApp();
+                } else {
+                    showLoginScreen();
+                }
+            } catch (error) {
+                console.error('Session check failed:', error);
+                showLoginScreen();
+            }
+        }
+        
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            // Get CSRF token first
+            await getCsrfToken();
+            formData.append('csrf_token', csrfToken);
+            
+            try {
+                const response = await fetch('data.php?action=login', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUser = data.user;
+                    csrfToken = data.csrf_token;
+                    showMainApp();
+                    hideError('login-error');
+                } else {
+                    showError('login-error', data.message);
+                }
+            } catch (error) {
+                console.error('Login failed:', error);
+                showError('login-error', 'Login failed. Please try again.');
+            }
+        }
+        
+        async function logout() {
+            try {
+                const formData = new FormData();
+                formData.append('csrf_token', csrfToken);
+                
+                const response = await fetch('data.php?action=logout', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                currentUser = null;
+                csrfToken = null;
+                showLoginScreen();
+            } catch (error) {
+                console.error('Logout failed:', error);
+                showLoginScreen();
+            }
+        }
+        
+        async function getCsrfToken() {
+            try {
+                const response = await fetch('data.php?action=csrf_token', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    csrfToken = data.csrf_token;
+                }
+            } catch (error) {
+                console.error('CSRF token fetch failed:', error);
+            }
+        }
+        
+        // UI Functions
+        function showLoginScreen() {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+        }
+        
+        function showMainApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            
+            // Update user info
+            document.getElementById('user-name').textContent = currentUser.username;
+            
+            // Load dashboard
+            showView('dashboard');
+        }
+        
+        function showView(viewName) {
+            // Hide all views
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            // Update sidebar
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected view
+            document.getElementById(viewName + '-view').classList.remove('hidden');
+            
+            // Update active nav link
+            const activeLink = document.querySelector(`.sidebar .nav-link[onclick="showView('${viewName}')"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+            
+            currentView = viewName;
+            
+            // Load data for the view
+            switch (viewName) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'students':
+                    loadStudents();
+                    break;
+                case 'books':
+                    loadBooks();
+                    break;
+                case 'lending':
+                    loadLending();
+                    break;
+            }
+        }
+        
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+        
+        function hideError(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.add('hidden');
+        }
+        
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Dashboard functions
+        async function loadDashboard() {
+            try {
+                // Load dashboard statistics
+                const [studentsResponse, booksResponse, lendingResponse] = await Promise.all([
+                    fetch('data.php?action=students&limit=1', { credentials: 'include' }),
+                    fetch('data.php?action=books&limit=1', { credentials: 'include' }),
+                    fetch('data.php?action=lending&limit=1', { credentials: 'include' })
+                ]);
+                
+                const [studentsData, booksData, lendingData] = await Promise.all([
+                    studentsResponse.json(),
+                    booksResponse.json(),
+                    lendingResponse.json()
+                ]);
+                
+                if (studentsData.success) {
+                    document.getElementById('total-students').textContent = studentsData.pagination.total;
+                }
+                
+                if (booksData.success) {
+                    document.getElementById('total-books').textContent = booksData.pagination.total;
+                }
+                
+                if (lendingData.success) {
+                    document.getElementById('books-borrowed').textContent = lendingData.pagination.total;
+                }
+                
+                // Load overdue books
+                const overdueResponse = await fetch('data.php?action=lending&status=overdue&limit=1', { credentials: 'include' });
+                const overdueData = await overdueResponse.json();
+                
+                if (overdueData.success) {
+                    document.getElementById('overdue-books').textContent = overdueData.pagination.total;
+                }
+                
+            } catch (error) {
+                console.error('Dashboard load failed:', error);
+            }
+        }
+        
+        // Students functions
+        async function loadStudents(page = 1, search = '') {
+            try {
+                const params = new URLSearchParams({
+                    action: 'students',
+                    page: page,
+                    limit: 20
+                });
+                
+                if (search) {
+                    params.append('search', search);
+                }
+                
+                const response = await fetch(`data.php?${params}`, { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderStudentsTable(data.data);
+                    renderPagination('students', data.pagination);
+                    currentPage.students = page;
+                } else {
+                    showAlert('Failed to load students: ' + data.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Students load failed:', error);
+                showAlert('Failed to load students', 'danger');
+            }
+        }
+        
+        function renderStudentsTable(students) {
+            const tbody = document.getElementById('students-table-body');
+            
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No students found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>${student.student_id}</td>
+                    <td>${student.first_name} ${student.last_name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.phone || '-'}</td>
+                    <td>${student.class}</td>
+                    <td>
+                        ${hasPermission('manage_students') ? `
+                            <button class="btn btn-sm btn-outline-primary" onclick="editStudent(${student.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${student.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        async function searchStudents() {
+            const search = document.getElementById('students-search').value;
+            await loadStudents(1, search);
+        }
+        
+        function clearSearch(type) {
+            document.getElementById(type + '-search').value = '';
+            if (type === 'lending') {
+                document.getElementById('lending-status').value = '';
+            }
+            
+            switch (type) {
+                case 'students':
+                    loadStudents();
+                    break;
+                case 'books':
+                    loadBooks();
+                    break;
+                case 'lending':
+                    loadLending();
+                    break;
+            }
+        }
+        
+        function showStudentModal(student = null) {
+            const modal = new bootstrap.Modal(document.getElementById('studentModal'));
+            const form = document.getElementById('student-form');
+            
+            if (student) {
+                document.getElementById('studentModalTitle').textContent = 'Edit Student';
+                document.getElementById('student-id').value = student.id;
+                document.getElementById('student-student-id').value = student.student_id;
+                document.getElementById('student-first-name').value = student.first_name;
+                document.getElementById('student-last-name').value = student.last_name;
+                document.getElementById('student-email').value = student.email;
+                document.getElementById('student-phone').value = student.phone || '';
+                document.getElementById('student-class').value = student.class;
+            } else {
+                document.getElementById('studentModalTitle').textContent = 'Add Student';
+                form.reset();
+                document.getElementById('student-id').value = '';
+            }
+            
+            modal.show();
+        }
+        
+        async function saveStudent() {
+            const form = document.getElementById('student-form');
+            const formData = new FormData(form);
+            formData.append('csrf_token', csrfToken);
+            
+            const isEdit = document.getElementById('student-id').value !== '';
+            const method = isEdit ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch('data.php?action=students', {
+                    method: method,
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                    bootstrap.Modal.getInstance(document.getElementById('studentModal')).hide();
+                    loadStudents(currentPage.students);
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Student save failed:', error);
+                showAlert('Failed to save student', 'danger');
+            }
+        }
+        
+        async function editStudent(id) {
+            try {
+                const response = await fetch(`data.php?action=students&id=${id}`, { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    showStudentModal(data.data[0]);
+                } else {
+                    showAlert('Failed to load student data', 'danger');
+                }
+            } catch (error) {
+                console.error('Student edit failed:', error);
+                showAlert('Failed to load student data', 'danger');
+            }
+        }
+        
+        async function deleteStudent(id) {
+            if (!confirm('Are you sure you want to delete this student?')) {
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('csrf_token', csrfToken);
+            
+            try {
+                const response = await fetch('data.php?action=students', {
+                    method: 'DELETE',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                    loadStudents(currentPage.students);
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Student delete failed:', error);
+                showAlert('Failed to delete student', 'danger');
+            }
+        }
+        
+        // Books functions
+        async function loadBooks(page = 1, search = '') {
+            try {
+                const params = new URLSearchParams({
+                    action: 'books',
+                    page: page,
+                    limit: 20
+                });
+                
+                if (search) {
+                    params.append('search', search);
+                }
+                
+                const response = await fetch(`data.php?${params}`, { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderBooksTable(data.data);
+                    renderPagination('books', data.pagination);
+                    currentPage.books = page;
+                } else {
+                    showAlert('Failed to load books: ' + data.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Books load failed:', error);
+                showAlert('Failed to load books', 'danger');
+            }
+        }
+        
+        function renderBooksTable(books) {
+            const tbody = document.getElementById('books-table-body');
+            
+            if (books.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No books found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = books.map(book => `
+                <tr>
+                    <td>${book.isbn}</td>
+                    <td>${book.title}</td>
+                    <td>${book.author}</td>
+                    <td>${book.category}</td>
+                    <td>${book.total_copies}</td>
+                    <td>${book.available_copies}</td>
+                    <td>
+                        ${hasPermission('manage_books') ? `
+                            <button class="btn btn-sm btn-outline-primary" onclick="editBook(${book.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteBook(${book.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        async function searchBooks() {
+            const search = document.getElementById('books-search').value;
+            await loadBooks(1, search);
+        }
+        
+        function showBookModal(book = null) {
+            const modal = new bootstrap.Modal(document.getElementById('bookModal'));
+            const form = document.getElementById('book-form');
+            
+            if (book) {
+                document.getElementById('bookModalTitle').textContent = 'Edit Book';
+                document.getElementById('book-id').value = book.id;
+                document.getElementById('book-isbn').value = book.isbn;
+                document.getElementById('book-title').value = book.title;
+                document.getElementById('book-author').value = book.author;
+                document.getElementById('book-publisher').value = book.publisher || '';
+                document.getElementById('book-year').value = book.publication_year || '';
+                document.getElementById('book-category').value = book.category;
+                document.getElementById('book-copies').value = book.total_copies;
+            } else {
+                document.getElementById('bookModalTitle').textContent = 'Add Book';
+                form.reset();
+                document.getElementById('book-id').value = '';
+            }
+            
+            modal.show();
+        }
+        
+        async function saveBook() {
+            const form = document.getElementById('book-form');
+            const formData = new FormData(form);
+            formData.append('csrf_token', csrfToken);
+            
+            const isEdit = document.getElementById('book-id').value !== '';
+            const method = isEdit ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch('data.php?action=books', {
+                    method: method,
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                    bootstrap.Modal.getInstance(document.getElementById('bookModal')).hide();
+                    loadBooks(currentPage.books);
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Book save failed:', error);
+                showAlert('Failed to save book', 'danger');
+            }
+        }
+        
+        async function editBook(id) {
+            try {
+                const response = await fetch(`data.php?action=books&id=${id}`, { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    showBookModal(data.data[0]);
+                } else {
+                    showAlert('Failed to load book data', 'danger');
+                }
+            } catch (error) {
+                console.error('Book edit failed:', error);
+                showAlert('Failed to load book data', 'danger');
+            }
+        }
+        
+        async function deleteBook(id) {
+            if (!confirm('Are you sure you want to delete this book?')) {
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('csrf_token', csrfToken);
+            
+            try {
+                const response = await fetch('data.php?action=books', {
+                    method: 'DELETE',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                    loadBooks(currentPage.books);
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Book delete failed:', error);
+                showAlert('Failed to delete book', 'danger');
+            }
+        }
+        
+        // Lending functions
+        async function loadLending(page = 1, search = '', status = '') {
+            try {
+                const params = new URLSearchParams({
+                    action: 'lending',
+                    page: page,
+                    limit: 20
+                });
+                
+                if (search) {
+                    params.append('search', search);
+                }
+                
+                if (status) {
+                    params.append('status', status);
+                }
+                
+                const response = await fetch(`data.php?${params}`, { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderLendingTable(data.data);
+                    renderPagination('lending', data.pagination);
+                    currentPage.lending = page;
+                } else {
+                    showAlert('Failed to load lending records: ' + data.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Lending load failed:', error);
+                showAlert('Failed to load lending records', 'danger');
+            }
+        }
+        
+        function renderLendingTable(lending) {
+            const tbody = document.getElementById('lending-table-body');
+            
+            if (lending.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No lending records found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = lending.map(record => {
+                const borrowedDate = new Date(record.borrowed_at).toLocaleDateString();
+                const dueDate = new Date(record.due_date).toLocaleDateString();
+                const isOverdue = new Date(record.due_date) < new Date() && record.status === 'borrowed';
+                const statusClass = isOverdue ? 'overdue' : record.status;
+                
+                return `
+                    <tr>
+                        <td>${record.student_id} - ${record.first_name} ${record.last_name}</td>
+                        <td>${record.title} by ${record.author}</td>
+                        <td>${borrowedDate}</td>
+                        <td>${dueDate}</td>
+                        <td>
+                            <span class="status-badge status-${statusClass}">
+                                ${isOverdue ? 'Overdue' : record.status}
+                            </span>
+                        </td>
+                        <td>
+                            ${record.status === 'borrowed' && hasPermission('manage_lending') ? `
+                                <button class="btn btn-sm btn-outline-success" onclick="showReturnModal(${record.id})">
+                                    <i class="fas fa-undo"></i> Return
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        async function searchLending() {
+            const search = document.getElementById('lending-search').value;
+            const status = document.getElementById('lending-status').value;
+            await loadLending(1, search, status);
+        }
+        
+        async function showLendingModal() {
+            const modal = new bootstrap.Modal(document.getElementById('lendingModal'));
+            const form = document.getElementById('lending-form');
+            form.reset();
+            
+            // Load students and books for dropdowns
+            await loadStudentsForDropdown();
+            await loadBooksForDropdown();
+            
+            modal.show();
+        }
+        
+        async function loadStudentsForDropdown() {
+            try {
+                const response = await fetch('data.php?action=students&limit=1000', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const select = document.getElementById('lending-student');
+                    select.innerHTML = '<option value="">Select a student...</option>';
+                    
+                    data.data.forEach(student => {
+                        const option = document.createElement('option');
+                        option.value = student.id;
+                        option.textContent = `${student.student_id} - ${student.first_name} ${student.last_name}`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Students dropdown load failed:', error);
+            }
+        }
+        
+        async function loadBooksForDropdown() {
+            try {
+                const response = await fetch('data.php?action=books&limit=1000', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const select = document.getElementById('lending-book');
+                    select.innerHTML = '<option value="">Select a book...</option>';
+                    
+                    data.data.forEach(book => {
+                        if (book.available_copies > 0) {
+                            const option = document.createElement('option');
+                            option.value = book.id;
+                            option.textContent = `${book.title} by ${book.author} (${book.available_copies} available)`;
+                            select.appendChild(option);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Books dropdown load failed:', error);
+            }
+        }
+        
+        async function saveLending() {
+            const form = document.getElementById('lending-form');
+            const formData = new FormData(form);
+            formData.append('csrf_token', csrfToken);
+            
+            try {
+                const response = await fetch('data.php?action=lending', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                    bootstrap.Modal.getInstance(document.getElementById('lendingModal')).hide();
+                    loadLending(currentPage.lending);
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Lending save failed:', error);
+                showAlert('Failed to save lending record', 'danger');
+            }
+        }
+        
+        function showReturnModal(lendingId) {
+            const modal = new bootstrap.Modal(document.getElementById('returnModal'));
+            document.getElementById('return-lending-id').value = lendingId;
+            document.getElementById('return-notes').value = '';
+            modal.show();
+        }
+        
+        async function returnBook() {
+            const formData = new FormData();
+            formData.append('lending_id', document.getElementById('return-lending-id').value);
+            formData.append('notes', document.getElementById('return-notes').value);
+            formData.append('csrf_token', csrfToken);
+            
+            try {
+                const response = await fetch('data.php?action=lending', {
+                    method: 'PUT',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                    bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
+                    loadLending(currentPage.lending);
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Book return failed:', error);
+                showAlert('Failed to return book', 'danger');
+            }
+        }
+        
+        // Utility functions
+        function hasPermission(permission) {
+            return currentUser && currentUser.permissions && currentUser.permissions.includes(permission);
+        }
+        
+        function renderPagination(type, pagination) {
+            const container = document.getElementById(type + '-pagination');
+            
+            if (pagination.pages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '<nav><ul class="pagination">';
+            
+            // Previous button
+            if (pagination.page > 1) {
+                paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage('${type}', ${pagination.page - 1})">Previous</a></li>`;
+            }
+            
+            // Page numbers
+            const startPage = Math.max(1, pagination.page - 2);
+            const endPage = Math.min(pagination.pages, pagination.page + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const activeClass = i === pagination.page ? 'active' : '';
+                paginationHTML += `<li class="page-item ${activeClass}"><a class="page-link" href="#" onclick="loadPage('${type}', ${i})">${i}</a></li>`;
+            }
+            
+            // Next button
+            if (pagination.page < pagination.pages) {
+                paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage('${type}', ${pagination.page + 1})">Next</a></li>`;
+            }
+            
+            paginationHTML += '</ul></nav>';
+            container.innerHTML = paginationHTML;
+        }
+        
+        function loadPage(type, page) {
+            const search = document.getElementById(type + '-search').value;
+            const status = type === 'lending' ? document.getElementById('lending-status').value : '';
+            
+            switch (type) {
+                case 'students':
+                    loadStudents(page, search);
+                    break;
+                case 'books':
+                    loadBooks(page, search);
+                    break;
+                case 'lending':
+                    loadLending(page, search, status);
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
