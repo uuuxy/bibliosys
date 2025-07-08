@@ -81,7 +81,7 @@ function validateInput($data, $rules) {
             // Type validation
             switch ($rule['type']) {
                 case 'string':
-                    $value = filter_var($value, FILTER_SANITIZE_STRING);
+                    $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                     if (isset($rule['max_length']) && strlen($value) > $rule['max_length']) {
                         $errors[] = "$field must be max {$rule['max_length']} characters";
                     }
@@ -142,6 +142,10 @@ function safeOutput($data) {
     if (is_array($data)) {
         return array_map('safeOutput', $data);
     }
+    // Additional security: remove javascript: and other dangerous protocols
+    $data = preg_replace('/javascript:/i', '', $data);
+    $data = preg_replace('/vbscript:/i', '', $data);
+    $data = preg_replace('/data:/i', '', $data);
     return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
 }
 

@@ -29,24 +29,24 @@ if (file_exists(__DIR__ . '/.env')) {
 }
 
 // Database Configuration
-define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
-define('DB_NAME', $_ENV['DB_NAME'] ?? 'bibliosys');
-define('DB_USER', $_ENV['DB_USER'] ?? 'bibliosys_user');
-define('DB_PASS', $_ENV['DB_PASS'] ?? '');
+define('DB_HOST', $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?: 'localhost');
+define('DB_NAME', $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?: 'bibliosys');
+define('DB_USER', $_ENV['DB_USER'] ?? getenv('DB_USER') ?: 'bibliosys_user');
+define('DB_PASS', $_ENV['DB_PASS'] ?? getenv('DB_PASS') ?: '');
 
 // Security Configuration
-define('SESSION_SECRET', $_ENV['SESSION_SECRET'] ?? 'change-this-secret-key');
-define('CSRF_SECRET', $_ENV['CSRF_SECRET'] ?? 'change-this-csrf-secret');
-define('CSP_NONCE_SECRET', $_ENV['CSP_NONCE_SECRET'] ?? 'change-this-nonce-secret');
+define('SESSION_SECRET', $_ENV['SESSION_SECRET'] ?? getenv('SESSION_SECRET') ?: 'change-this-secret-key');
+define('CSRF_SECRET', $_ENV['CSRF_SECRET'] ?? getenv('CSRF_SECRET') ?: 'change-this-csrf-secret');
+define('CSP_NONCE_SECRET', $_ENV['CSP_NONCE_SECRET'] ?? getenv('CSP_NONCE_SECRET') ?: 'change-this-nonce-secret');
 
 // Application Settings
-define('APP_DEBUG', filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN));
-define('APP_ENV', $_ENV['APP_ENV'] ?? 'production');
-define('APP_NAME', $_ENV['APP_NAME'] ?? 'BiblioSys');
+define('APP_DEBUG', filter_var($_ENV['APP_DEBUG'] ?? getenv('APP_DEBUG') ?: false, FILTER_VALIDATE_BOOLEAN));
+define('APP_ENV', $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production');
+define('APP_NAME', $_ENV['APP_NAME'] ?? getenv('APP_NAME') ?: 'BiblioSys');
 
 // Security Settings
-define('LOGIN_RATE_LIMIT', (int)($_ENV['LOGIN_RATE_LIMIT'] ?? 5));
-define('LOGIN_RATE_WINDOW', (int)($_ENV['LOGIN_RATE_WINDOW'] ?? 900)); // 15 minutes
+define('LOGIN_RATE_LIMIT', (int)($_ENV['LOGIN_RATE_LIMIT'] ?? getenv('LOGIN_RATE_LIMIT') ?: 5));
+define('LOGIN_RATE_WINDOW', (int)($_ENV['LOGIN_RATE_WINDOW'] ?? getenv('LOGIN_RATE_WINDOW') ?: 900)); // 15 minutes
 
 // Session Configuration
 ini_set('session.cookie_httponly', 1);
