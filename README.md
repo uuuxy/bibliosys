@@ -1,2 +1,2 @@
 # bibliosys-50k
-school library
+Modernes Bibliothekssystem für 50.000 Bücher
