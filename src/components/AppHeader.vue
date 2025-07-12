@@ -1,13 +1,13 @@
 <template>
-  <header class="app-header">
-    <div class="header-left">
-      <h1>📚 BiblioSys 50k</h1>
-    </div>
-    <div class="header-right" v-if="authStore.isLoggedIn">
-      <span class="user-info">
-        👤 {{ authStore.user?.fullName }} ({{ authStore.user?.role }})
-      </span>
-      <button @click="handleLogout" class="logout-btn">🚪 Abmelden</button>
+  <header class="bg-primary text-white py-3 mb-4 shadow-sm">
+    <div class="container d-flex justify-content-between align-items-center">
+      <h1 class="h4 mb-0">📚 BiblioSys 50k</h1>
+      <div v-if="authStore.isLoggedIn" class="d-flex align-items-center gap-3">
+        <span class="user-info small">
+          👤 {{ authStore.user?.fullName }} ({{ authStore.user?.role }})
+        </span>
+        <button @click="handleLogout" class="btn btn-light btn-sm">🚪 Abmelden</button>
+      </div>
     </div>
   </header>
 </template>
@@ -26,32 +26,6 @@ function handleLogout() {
 </script>
 
 <style scoped>
-.app-header {
-  background-color: #343a40;
-  color: white;
-  padding: 15px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-.user-info {
-  font-size: 14px;
-}
-.logout-btn {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.logout-btn:hover {
-  background-color: #c82333;
-}
+/* Bootstrap übernimmt das Layout */
 </style>
 

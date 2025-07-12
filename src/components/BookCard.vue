@@ -23,7 +23,7 @@
         </p>
     </div>
     <div class="book-actions">
-      <button @click="$emit('edit', book)" class="btn btn-secondary">Bearbeiten</button>
+      <button @click="$emit('edit', book)" class="edit-btn">Bearbeiten</button>
     </div>
   </div>
 </template>
@@ -45,39 +45,85 @@ function toggleSelection() {
 
 <style scoped>
 .book-card {
-  background-color: #fff; border: 1px solid #dee2e6; border-radius: 8px;
-  padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  display: flex; flex-direction: column;
-}
-.book-cover-container {
-    height: 160px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-.book-cover { width: auto; height: 100%; }
-.cover-placeholder { font-size: 50px; color: #adb5bd; }
-h4 { margin-bottom: 10px; flex-grow: 1; }
-.book-details p { font-size: 14px; margin-bottom: 5px; }
-.book-actions { margin-top: 15px; display: flex; gap: 10px; }
-.status { padding: 2px 6px; border-radius: 4px; color: white; font-size: 12px; }
-.status.available, .status.verfügbar { background-color: #28a745; }
-.status.lent, .status.ausgeliehen { background-color: #dc3545; }
-.book-card { position: relative; }
-.selection-checkbox {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 20px;
-    height: 20px;
-    z-index: 10;
+  background: #fff;
+  border-radius: 0.7rem;
+  box-shadow: 0 2px 10px 0 rgba(0,0,0,0.06);
+  padding: 1.2rem 1rem 1rem 1rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  transition: box-shadow 0.14s, transform 0.14s;
 }
 .book-card.is-selected {
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  box-shadow: 0 4px 18px 0 rgba(0,123,255,0.13);
+  border: 1.5px solid #007bff;
+}
+.book-cover-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.7rem;
+}
+.book-cover {
+  width: 60px;
+  height: 85px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.07);
+}
+.cover-placeholder {
+  width: 60px;
+  height: 85px;
+  background: #e9ecef;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #adb5bd;
+}
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem 0;
+}
+.book-details {
+  font-size: 0.97rem;
+  color: #444;
+  margin-bottom: 0.5rem;
+}
+.status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.92em;
+  color: #fff;
+  background: #007bff;
+  margin-left: 0.3em;
+}
+.status.available { background: #28a745; }
+.status.borrowed { background: #fd7e14; }
+.status.lost { background: #dc3545; }
+.book-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+}
+.edit-btn {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.14s;
+}
+.edit-btn:hover {
+  background: #0056b3;
+}
+.selection-checkbox {
+  margin-bottom: 0.5rem;
 }
 </style>

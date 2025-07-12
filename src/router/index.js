@@ -11,10 +11,12 @@ import PublicOrderView from '@/views/PublicOrderView.vue';
 // Admin-Ansichten
 import SuppliersView from '@/views/SuppliersView.vue';
 import InventoryView from '@/views/InventoryView.vue';
+import InventoryCheckView from '@/views/InventoryCheckView.vue';
 import AdminLayout from '@/views/admin/AdminLayout.vue';
 import AdminDashboardView from '@/views/admin/AdminDashboardView.vue';
+import DataMigrationView from '@/views/DataMigrationView.vue';
 import UserManagementView from '@/views/admin/UserManagementView.vue';
-import ExtendLendingsView from '@/views/admin/ExtendLendingsView.vue';
+import ExtensionView from '@/views/ExtensionView.vue';
 import SettingsIdCard from '@/views/admin/SettingsIdCard.vue';
 import OrderManagementView from '@/views/admin/OrderManagementView.vue';
 import BooksView from '@/views/BooksView.vue';
@@ -31,6 +33,7 @@ const router = createRouter({
     { path: '/students', name: 'students', component: StudentsView, meta: { requiresAuth: true } },
 
     { path: '/inventory', name: 'inventory', component: InventoryView, meta: { requiresAuth: true } },
+    { path: '/inventory-check', name: 'inventory-check', component: InventoryCheckView, meta: { requiresAuth: true } },
     { path: '/orders', name: 'orders', component: OrdersView, meta: { requiresAuth: true } },
     { path: '/books', name: 'books', component: BooksView, meta: { requiresAuth: true } },
 
@@ -70,13 +73,12 @@ const router = createRouter({
         {
           path: 'extend',
           name: 'admin-extend',
-          component: ExtendLendingsView,
+          component: ExtensionView,
         },
         {
           path: 'migration',
           name: 'admin-migration',
-          // Ersetzen Sie AdminDashboardView durch Ihre echte Komponente
-          component: AdminDashboardView, // z.B. MigrationTool
+          component: DataMigrationView,
         },
       ]
     }

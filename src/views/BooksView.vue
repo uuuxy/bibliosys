@@ -1,12 +1,9 @@
 <template>
-  <div class="books-view">
-    <div v-if="bookStore.books.length > 0" class="book-grid">
-      <BookCard 
-        v-for="book in bookStore.books" 
-        :key="book.barcode" 
-        :book="book"
-        @edit="openEditModal" 
-      />
+  <div class="container py-3">
+    <div v-if="bookStore.books.length > 0" class="row g-3">
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3" v-for="book in bookStore.books" :key="book.barcode">
+        <BookCard :book="book" @edit="openEditModal" />
+      </div>
     </div>
     <AddBookModal v-model="isAddModalVisible" />
     <EditBookModal v-model="isEditModalVisible" :book="selectedBook" />
@@ -35,5 +32,5 @@ function openEditModal(book) {
 </script>
 
 <style scoped>
-/* ... (vorhandene Stile) ... */
+/* Bootstrap übernimmt das Grid und die Abstände */
 </style>
