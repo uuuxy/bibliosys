@@ -4,12 +4,7 @@ README.md
 
 Deutsch
 
-Projektstatus: Bibliotheksanwendung
-
-Dies ist die aktuelle und definitive Übersicht über den Status unserer Bibliotheksanwendung – was bereits fertig ist und was als Nächstes ansteht.
-
-Teil 1: Fertige und implementierte Funktionen
-
+P
 Ausleihe & Rückgabe:
 Intelligente Universal-Suche: Eine zentrale Suchleiste auf der Startseite erkennt Schüler-IDs, Buch-Barcodes und Namen und zeigt sofort die relevanten Informationen an. (Fertig)
 Anzeige von überfälligen Büchern: Überfällige Bücher werden in der Detailansicht eines Schülers deutlich rot markiert. (Fertig)
