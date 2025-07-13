@@ -303,33 +303,55 @@ class BiblioDatabase {
     return { success: true };
   }
 
+  // ERSETZT: createOrder optimiert für Bulk-Insert und Zählerhandling
   async createOrder(orderData) {
-      const connection = await this.pool.getConnection();
-      try {
-          await connection.beginTransaction();
-          const publicToken = crypto.randomUUID();
-          const orderQuery = "INSERT INTO orders (order_date, supplier_id, public_token) VALUES (CURDATE(), ?, ?)";
-          const [orderResult] = await connection.execute(orderQuery, [orderData.supplier || null, publicToken]);
-          const newOrderId = orderResult.insertId;
-          const generatedIds = [];
-          for (const item of orderData.items) {
-              for (let i = 0; i < item.quantity; i++) {
-                  const nextId = await this.getNextBookCounter(connection);
-                  const libraryBarcodeId = `buch-${nextId}`;
-                  generatedIds.push(libraryBarcodeId);
-                  const itemQuery = "INSERT INTO order_items (order_id, isbn, title, author, library_barcode_id) VALUES (?, ?, ?, ?, ?)";
-                  await connection.execute(itemQuery, [newOrderId, item.isbn, item.title, item.author, libraryBarcodeId]);
-              }
-          }
-          await connection.commit();
-          return { success: true, orderId: newOrderId, generatedIds, publicToken };
-      } catch (error) {
-          await connection.rollback();
-          console.error("Fehler beim Erstellen der Bestellung in der Datenbank:", error);
-          throw new Error("Die Bestellung konnte aufgrund eines Datenbankfehlers nicht erstellt werden.");
-      } finally {
-          connection.release();
-      }
+    const connection = await this.pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // 1. Hole den Start-Zähler EINMAL und sperre die Zeile
+        const [[counterRow]] = await connection.execute("SELECT counter_value FROM app_counters WHERE counter_key = 'next_book_id' FOR UPDATE");
+        let nextId = counterRow.counter_value;
+        
+        // 2. Erstelle die Hauptbestellung
+        const publicToken = crypto.randomUUID();
+        const orderQuery = "INSERT INTO orders (order_date, supplier_id, public_token, status) VALUES (?, ?, ?, 'ordered')";
+        const [orderResult] = await connection.execute(orderQuery, [orderData.order_date, orderData.supplier_id, publicToken]);
+        const newOrderId = orderResult.insertId;
+
+        // 3. Bereite die Bestellelemente für einen einzigen großen Insert vor
+        const orderItemsValues = [];
+        const generatedIds = [];
+        for (const item of orderData.items) {
+            for (let i = 0; i < item.quantity; i++) {
+                const libraryBarcodeId = `buch-${nextId}`;
+                generatedIds.push(libraryBarcodeId);
+                orderItemsValues.push([newOrderId, item.isbn, item.title, item.author, libraryBarcodeId]);
+                nextId++; // Inkrementiere den Zähler im Code
+            }
+        }
+        
+        // 4. Führe den Bulk-Insert für alle Artikel durch
+        if (orderItemsValues.length > 0) {
+            const itemsQuery = "INSERT INTO order_items (order_id, isbn, title, author, library_barcode_id) VALUES ?";
+            await connection.query(itemsQuery, [orderItemsValues]);
+        }
+
+        // 5. Aktualisiere den Zähler in der Datenbank EINMAL am Ende
+        await connection.execute("UPDATE app_counters SET counter_value = ? WHERE counter_key = 'next_book_id'", [nextId]);
+        
+        // 6. Schließe die Transaktion ab
+        await connection.commit();
+        
+        return { success: true, orderId: newOrderId, generatedIds, publicToken };
+
+    } catch (error) {
+        await connection.rollback();
+        console.error("Fehler beim Erstellen der Bestellung in der Datenbank:", error);
+        throw new Error("Die Bestellung konnte aufgrund eines Datenbankfehlers nicht erstellt werden.");
+    } finally {
+        connection.release();
+    }
   }
 
   async getOrderByToken(token) {
@@ -344,12 +366,7 @@ class BiblioDatabase {
       return { ...order, items: items };
   }
   
-  async getNextBookCounter(connection) {
-      const [[row]] = await connection.execute("SELECT counter_value FROM app_counters WHERE counter_key = 'next_book_id' FOR UPDATE");
-      const nextId = row.counter_value;
-      await connection.execute("UPDATE app_counters SET counter_value = ? WHERE counter_key = 'next_book_id'", [nextId + 1]);
-      return nextId;
-  }
+  // getNextBookCounter wird nicht mehr benötigt und entfernt
 
   // === KATEGORIEN ===
 
